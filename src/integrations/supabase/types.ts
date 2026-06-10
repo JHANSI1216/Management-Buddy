@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_recommendations: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          impact: string | null
+          module: string
+          severity: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          impact?: string | null
+          module: string
+          severity?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          impact?: string | null
+          module?: string
+          severity?: string
+          title?: string
+        }
+        Relationships: []
+      }
       attendance_marks: {
         Row: {
           created_at: string
@@ -45,6 +75,156 @@ export type Database = {
             referencedColumns: ["htno"]
           },
         ]
+      }
+      facilities: {
+        Row: {
+          capacity: number
+          created_at: string
+          id: string
+          name: string
+          predicted_next_pct: number | null
+          trend: string
+          type: string
+          updated_at: string
+          utilization_pct: number
+        }
+        Insert: {
+          capacity: number
+          created_at?: string
+          id?: string
+          name: string
+          predicted_next_pct?: number | null
+          trend?: string
+          type: string
+          updated_at?: string
+          utilization_pct?: number
+        }
+        Update: {
+          capacity?: number
+          created_at?: string
+          id?: string
+          name?: string
+          predicted_next_pct?: number | null
+          trend?: string
+          type?: string
+          updated_at?: string
+          utilization_pct?: number
+        }
+        Relationships: []
+      }
+      inventory_items: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          last_restocked: string | null
+          min_threshold: number
+          name: string
+          predicted_need: number
+          quantity: number
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          last_restocked?: string | null
+          min_threshold?: number
+          name: string
+          predicted_need?: number
+          quantity?: number
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          last_restocked?: string | null
+          min_threshold?: number
+          name?: string
+          predicted_need?: number
+          quantity?: number
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      maintenance_records: {
+        Row: {
+          created_at: string
+          equipment_name: string
+          health_score: number
+          id: string
+          last_serviced: string | null
+          location: string
+          next_due: string | null
+          notes: string | null
+          risk_level: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          equipment_name: string
+          health_score?: number
+          id?: string
+          last_serviced?: string | null
+          location: string
+          next_due?: string | null
+          notes?: string | null
+          risk_level?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          equipment_name?: string
+          health_score?: number
+          id?: string
+          last_serviced?: string | null
+          location?: string
+          next_due?: string | null
+          notes?: string | null
+          risk_level?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      resource_usage: {
+        Row: {
+          consumption: number
+          cost: number
+          created_at: string
+          forecast: boolean
+          id: string
+          period: string
+          resource_type: string
+          unit: string
+        }
+        Insert: {
+          consumption: number
+          cost?: number
+          created_at?: string
+          forecast?: boolean
+          id?: string
+          period: string
+          resource_type: string
+          unit: string
+        }
+        Update: {
+          consumption?: number
+          cost?: number
+          created_at?: string
+          forecast?: boolean
+          id?: string
+          period?: string
+          resource_type?: string
+          unit?: string
+        }
+        Relationships: []
       }
       students: {
         Row: {
