@@ -14,7 +14,65 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      attendance_marks: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          status: string
+          student_htno: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          status: string
+          student_htno: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          status?: string
+          student_htno?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_marks_student_htno_fkey"
+            columns: ["student_htno"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["htno"]
+          },
+        ]
+      }
+      students: {
+        Row: {
+          created_at: string
+          htno: string
+          name: string
+          sno: number
+          tp_percent: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          htno: string
+          name: string
+          sno: number
+          tp_percent?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          htno?: string
+          name?: string
+          sno?: number
+          tp_percent?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
