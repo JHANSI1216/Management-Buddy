@@ -1,350 +1,140 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
-import { toast } from "sonner";
-import { GraduationCap, Search, LogOut, Check, X, Calendar as CalendarIcon } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Brain, BarChart3, Zap, Package, Wrench, Building2, Sparkles, ShieldCheck, Cpu, TrendingUp, ArrowRight } from "lucide-react";
+import heroImg from "@/assets/ai-hero.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Student Attendance · IV CSE" },
-      { name: "description", content: "BTech IV-CSE student attendance dashboard with search, edit and daily marking." },
+      { title: "CPMS · College Predictive Management System" },
+      { name: "description", content: "AI-powered platform for college administrators — predict resource usage, infrastructure demand, equipment maintenance and operational trends." },
+      { property: "og:title", content: "CPMS · AI-powered College Management" },
+      { property: "og:description", content: "Data-driven decisions for campus infrastructure, resources, inventory and maintenance." },
     ],
   }),
-  component: AttendancePage,
+  component: () => <AppShell><Home /></AppShell>,
 });
 
-type Student = {
-  htno: string;
-  sno: number;
-  name: string;
-  tp_percent: number | null;
-};
+const benefits = [
+  { icon: Cpu, title: "AI-Powered Predictions", text: "ML-driven forecasts for usage, demand and risk across every department." },
+  { icon: ShieldCheck, title: "Proactive Maintenance", text: "Detect equipment risks before failure and schedule service automatically." },
+  { icon: TrendingUp, title: "Optimize Resources", text: "Cut electricity, water and internet waste with actionable suggestions." },
+  { icon: Sparkles, title: "Decision Support", text: "Plain-English recommendations for administrators, not raw dashboards." },
+];
 
-type Mark = { student_htno: string; status: "present" | "absent" };
+const modules = [
+  { icon: Building2, title: "Infrastructure Analytics", text: "Classroom, lab and facility utilization trends.", url: "/infrastructure" },
+  { icon: Zap, title: "Resource Management", text: "Electricity, water and internet forecasts.", url: "/resources" },
+  { icon: Package, title: "Inventory Management", text: "Stock tracking, low-stock alerts, predictions.", url: "/inventory" },
+  { icon: Wrench, title: "Maintenance Prediction", text: "Equipment health and risk-driven scheduling.", url: "/maintenance" },
+  { icon: BarChart3, title: "Reports & Analytics", text: "Historical comparisons and future forecasts.", url: "/reports" },
+];
 
-function AttendancePage() {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [students, setStudents] = useState<Student[]>([]);
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<"all" | "low">("all");
-  const [editing, setEditing] = useState<string | null>(null);
-  const [editValue, setEditValue] = useState("");
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
-  const [marks, setMarks] = useState<Record<string, "present" | "absent">>({});
-  const [tab, setTab] = useState("list");
-
-  const loadStudents = async () => {
-    const { data, error } = await supabase
-      .from("students")
-      .select("*")
-      .order("sno");
-    if (error) return toast.error(error.message);
-    setStudents((data ?? []) as Student[]);
-  };
-
-  const loadMarks = async (d: string) => {
-    const { data, error } = await supabase
-      .from("attendance_marks")
-      .select("student_htno,status")
-      .eq("date", d);
-    if (error) return toast.error(error.message);
-    const map: Record<string, "present" | "absent"> = {};
-    (data as Mark[] | null)?.forEach((m) => (map[m.student_htno] = m.status));
-    setMarks(map);
-  };
-
-  useEffect(() => { loadStudents(); }, []);
-  useEffect(() => { loadMarks(date); }, [date]);
-
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return students.filter((s) => {
-      if (filter === "low" && (s.tp_percent ?? 0) >= 65) return false;
-      if (!q) return true;
-      return s.name.toLowerCase().includes(q) || s.htno.toLowerCase().includes(q);
-    });
-  }, [students, search, filter]);
-
-  const stats = useMemo(() => {
-    const total = students.length;
-    const avg = total ? Math.round(students.reduce((a, s) => a + (s.tp_percent ?? 0), 0) / total) : 0;
-    const low = students.filter((s) => (s.tp_percent ?? 0) < 65).length;
-    return { total, avg, low };
-  }, [students]);
-
-  const startEdit = (s: Student) => {
-    setEditing(s.htno);
-    setEditValue(String(s.tp_percent ?? ""));
-  };
-
-  const saveEdit = async (htno: string) => {
-    const val = parseInt(editValue, 10);
-    if (isNaN(val) || val < 0 || val > 100) {
-      toast.error("Enter a number between 0 and 100");
-      return;
-    }
-    const { error } = await supabase
-      .from("students")
-      .update({ tp_percent: val, updated_at: new Date().toISOString() })
-      .eq("htno", htno);
-    if (error) return toast.error(error.message);
-    setStudents((prev) => prev.map((s) => (s.htno === htno ? { ...s, tp_percent: val } : s)));
-    setEditing(null);
-    toast.success("Updated");
-  };
-
-  const mark = async (htno: string, status: "present" | "absent") => {
-    const { error } = await supabase
-      .from("attendance_marks")
-      .upsert({ student_htno: htno, date, status }, { onConflict: "student_htno,date" });
-    if (error) return toast.error(error.message);
-    setMarks((m) => ({ ...m, [htno]: status }));
-  };
-
-  const markAll = async (status: "present" | "absent") => {
-    const rows = students.map((s) => ({ student_htno: s.htno, date, status }));
-    const { error } = await supabase.from("attendance_marks").upsert(rows, { onConflict: "student_htno,date" });
-    if (error) return toast.error(error.message);
-    const map: Record<string, "present" | "absent"> = {};
-    students.forEach((s) => (map[s.htno] = status));
-    setMarks(map);
-    toast.success(`All marked ${status}`);
-  };
-
-  const signOut = async () => {
-    await supabase.auth.signOut();
-    toast.success("Signed out");
-  };
-
-  const tpBadge = (p: number | null) => {
-    const v = p ?? 0;
-    if (v >= 75) return <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20">{v}%</Badge>;
-    if (v >= 65) return <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20">{v}%</Badge>;
-    return <Badge className="bg-red-500/15 text-red-700 dark:text-red-400 hover:bg-red-500/20">{v}%</Badge>;
-  };
-
+function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/40">
-      <header className="border-b bg-card/70 backdrop-blur sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <GraduationCap className="h-5 w-5" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold leading-tight">Student Attendance</h1>
-              <p className="text-xs text-muted-foreground">Dept. of CSE · BTech IV · Sem-I</p>
-            </div>
+    <div className="space-y-12">
+      {/* Hero */}
+      <section className="grid gap-8 lg:grid-cols-2 lg:items-center">
+        <div className="space-y-6 animate-fade-in">
+          <div className="inline-flex items-center gap-2 rounded-full glass px-3 py-1 text-xs">
+            <Brain className="h-3.5 w-3.5 text-primary" />
+            <span className="text-muted-foreground">Final-year AI project · Enterprise grade</span>
           </div>
-          <div className="flex items-center gap-2">
-            {user ? (
-              <>
-                <span className="hidden sm:inline text-sm text-muted-foreground">{user.email}</span>
-                <Button variant="outline" size="sm" onClick={signOut}>
-                  <LogOut className="h-4 w-4" /> Sign out
-                </Button>
-              </>
-            ) : (
-              <Button size="sm" onClick={() => navigate({ to: "/auth" })}>Admin sign in</Button>
-            )}
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
+            <span className="gradient-text">College Predictive</span><br />
+            <span>Management System</span>
+          </h1>
+          <p className="text-base sm:text-lg text-muted-foreground max-w-xl">
+            An AI-powered platform that helps administrators make data-driven decisions
+            by predicting resource usage, infrastructure demand, equipment maintenance and operational trends.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Button asChild size="lg" className="gradient-bg text-white glow">
+              <Link to="/dashboard">Launch Dashboard <ArrowRight className="h-4 w-4" /></Link>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link to="/infrastructure">Explore Modules</Link>
+            </Button>
+          </div>
+          <div className="grid grid-cols-3 gap-4 pt-4 max-w-md">
+            {[["98%","Accuracy"],["24/7","Monitoring"],["5","Modules"]].map(([v, l]) => (
+              <div key={l} className="glass rounded-xl p-3 text-center">
+                <p className="text-2xl font-bold gradient-text">{v}</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{l}</p>
+              </div>
+            ))}
           </div>
         </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto p-4 space-y-6">
-        <div className="grid gap-4 sm:grid-cols-3">
-          <StatCard label="Total students" value={stats.total} />
-          <StatCard label="Average TP%" value={`${stats.avg}%`} />
-          <StatCard label="Below 65%" value={stats.low} tone="warn" />
+        <div className="relative animate-fade-in">
+          <div className="absolute -inset-4 gradient-bg opacity-20 blur-3xl rounded-full" />
+          <img src={heroImg} alt="AI analytics illustration showing predictive dashboards for campus management"
+            className="relative rounded-2xl glass p-2 shadow-2xl w-full object-cover" />
         </div>
+      </section>
 
-        <Tabs value={tab} onValueChange={setTab}>
-          <TabsList>
-            <TabsTrigger value="list">Overall Avg</TabsTrigger>
-            <TabsTrigger value="mark" disabled={!user}>
-              {user ? "Mark Daily" : "Mark Daily (sign in)"}
-            </TabsTrigger>
-          </TabsList>
+      {/* Benefits */}
+      <section>
+        <h2 className="text-2xl font-bold mb-6">Key Benefits</h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {benefits.map((b) => (
+            <Card key={b.title} className="glass hover:glow transition-all hover-scale">
+              <CardContent className="p-5">
+                <div className="grid h-11 w-11 place-items-center rounded-xl gradient-bg text-white mb-3">
+                  <b.icon className="h-5 w-5" />
+                </div>
+                <h3 className="font-semibold">{b.title}</h3>
+                <p className="text-sm text-muted-foreground mt-1">{b.text}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
 
-          <TabsContent value="list" className="space-y-4">
-            <Card>
-              <CardHeader className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-                <CardTitle className="text-base">Attendance Report · 01-May to 06-Jun-2026</CardTitle>
-                <div className="flex gap-2">
-                  <div className="relative">
-                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      className="pl-8 w-56"
-                      placeholder="Search name or roll no…"
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                    />
+      {/* Modules */}
+      <section>
+        <h2 className="text-2xl font-bold mb-6">Platform Modules</h2>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {modules.map((m) => (
+            <Link key={m.url} to={m.url} className="group">
+              <Card className="glass h-full transition-all hover:-translate-y-1 hover:glow">
+                <CardContent className="p-5">
+                  <div className="grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-blue-500 to-violet-600 text-white mb-4">
+                    <m.icon className="h-6 w-6" />
                   </div>
-                  <Button
-                    variant={filter === "low" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setFilter(filter === "low" ? "all" : "low")}
-                  >
-                    Low only
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-12">S.No</TableHead>
-                        <TableHead>Htno</TableHead>
-                        <TableHead>Student Name</TableHead>
-                        <TableHead className="text-right w-32">TP%</TableHead>
-                        {user && <TableHead className="w-24" />}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filtered.map((s) => (
-                        <TableRow key={s.htno}>
-                          <TableCell className="text-muted-foreground">{s.sno}</TableCell>
-                          <TableCell className="font-mono text-xs">{s.htno}</TableCell>
-                          <TableCell className="font-medium">{s.name}</TableCell>
-                          <TableCell className="text-right">
-                            {editing === s.htno ? (
-                              <Input
-                                autoFocus
-                                type="number"
-                                min={0}
-                                max={100}
-                                value={editValue}
-                                onChange={(e) => setEditValue(e.target.value)}
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter") saveEdit(s.htno);
-                                  if (e.key === "Escape") setEditing(null);
-                                }}
-                                className="w-20 ml-auto"
-                              />
-                            ) : (
-                              tpBadge(s.tp_percent)
-                            )}
-                          </TableCell>
-                          {user && (
-                            <TableCell className="text-right">
-                              {editing === s.htno ? (
-                                <div className="flex gap-1 justify-end">
-                                  <Button size="icon" variant="ghost" onClick={() => saveEdit(s.htno)}>
-                                    <Check className="h-4 w-4" />
-                                  </Button>
-                                  <Button size="icon" variant="ghost" onClick={() => setEditing(null)}>
-                                    <X className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              ) : (
-                                <Button size="sm" variant="ghost" onClick={() => startEdit(s)}>Edit</Button>
-                              )}
-                            </TableCell>
-                          )}
-                        </TableRow>
-                      ))}
-                      {filtered.length === 0 && (
-                        <TableRow><TableCell colSpan={user ? 5 : 4} className="text-center text-muted-foreground py-8">No students match.</TableCell></TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-            {!user && (
-              <p className="text-center text-sm text-muted-foreground">
-                <Link to="/auth" className="underline">Sign in</Link> to edit TP% and mark daily attendance.
-              </p>
-            )}
-          </TabsContent>
+                  <h3 className="font-semibold flex items-center justify-between">
+                    {m.title}
+                    <ArrowRight className="h-4 w-4 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1">{m.text}</p>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </section>
 
-          <TabsContent value="mark" className="space-y-4">
-            <Card>
-              <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                  <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-44" />
-                </div>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => markAll("present")}>Mark all present</Button>
-                  <Button size="sm" variant="outline" onClick={() => markAll("absent")}>Mark all absent</Button>
-                </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-12">#</TableHead>
-                        <TableHead>Htno</TableHead>
-                        <TableHead>Name</TableHead>
-                        <TableHead className="text-right">Status</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {students.map((s) => {
-                        const status = marks[s.htno];
-                        return (
-                          <TableRow key={s.htno}>
-                            <TableCell className="text-muted-foreground">{s.sno}</TableCell>
-                            <TableCell className="font-mono text-xs">{s.htno}</TableCell>
-                            <TableCell className="font-medium">{s.name}</TableCell>
-                            <TableCell className="text-right">
-                              <div className="inline-flex gap-1">
-                                <Button
-                                  size="sm"
-                                  variant={status === "present" ? "default" : "outline"}
-                                  onClick={() => mark(s.htno, "present")}
-                                >
-                                  <Check className="h-3 w-3" /> P
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant={status === "absent" ? "destructive" : "outline"}
-                                  onClick={() => mark(s.htno, "absent")}
-                                >
-                                  <X className="h-3 w-3" /> A
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        <footer className="text-center text-xs text-muted-foreground py-4">
-          Narayana Engineering College (Autonomous), Nellore · Dept. of CSE
-        </footer>
-      </main>
+      {/* CTA */}
+      <section>
+        <Card className="glass overflow-hidden relative">
+          <div className="absolute inset-0 gradient-bg opacity-10" />
+          <CardContent className="relative p-8 sm:p-12 text-center space-y-4">
+            <h2 className="text-2xl sm:text-3xl font-bold">Ready to make data-driven decisions?</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">
+              Open the predictive dashboard to see live AI insights across infrastructure, resources, inventory and maintenance.
+            </p>
+            <div className="flex flex-wrap gap-3 justify-center">
+              <Button asChild size="lg" className="gradient-bg text-white glow">
+                <Link to="/dashboard">Open Dashboard</Link>
+              </Button>
+              <Button asChild size="lg" variant="outline">
+                <Link to="/reports">View Reports</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
     </div>
-  );
-}
-
-function StatCard({ label, value, tone }: { label: string; value: string | number; tone?: "warn" }) {
-  return (
-    <Card>
-      <CardContent className="pt-6">
-        <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
-        <p className={`mt-1 text-3xl font-bold ${tone === "warn" ? "text-amber-600 dark:text-amber-400" : ""}`}>{value}</p>
-      </CardContent>
-    </Card>
   );
 }
