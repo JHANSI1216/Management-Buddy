@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   Brain, LayoutDashboard, Building2, Zap, Package, Wrench, BarChart3,
-  Settings, GraduationCap, Sun, Moon, LogOut, LogIn, Sparkles,
+  Settings, GraduationCap, Sun, Moon, LogOut, LogIn, Sparkles, TrendingUp, Megaphone, UserCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/useTheme";
@@ -24,10 +24,13 @@ const modules = [
   { title: "Resources", url: "/resources", icon: Zap },
   { title: "Inventory", url: "/inventory", icon: Package },
   { title: "Maintenance", url: "/maintenance", icon: Wrench },
+  { title: "Admission Trends", url: "/admissions", icon: TrendingUp },
+  { title: "Outreach & Growth", url: "/outreach", icon: Megaphone },
   { title: "Reports", url: "/reports", icon: BarChart3 },
 ];
 const extras = [
   { title: "Attendance", url: "/attendance", icon: GraduationCap },
+  { title: "Student Portal", url: "/student", icon: UserCircle },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
