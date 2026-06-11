@@ -7,7 +7,8 @@ export function AuthGate({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   const pathname = useRouterState({ select: (r) => r.location.pathname });
   const navigate = useNavigate();
-  const isAuthRoute = pathname === "/auth";
+  const PUBLIC = ["/auth", "/student"];
+  const isAuthRoute = PUBLIC.includes(pathname);
 
   useEffect(() => {
     if (!loading && !user && !isAuthRoute) {
