@@ -78,14 +78,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "ManageBuddy" },
+      { name: "description", content: "Student Attendance Tracker: A web app for managing student attendance with image-based input and database integration." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "ManageBuddy" },
+      { property: "og:description", content: "Student Attendance Tracker: A web app for managing student attendance with image-based input and database integration." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "ManageBuddy" },
+      { name: "twitter:description", content: "Student Attendance Tracker: A web app for managing student attendance with image-based input and database integration." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/6a2cf1de-feb6-404d-9504-432e3f5334e8/id-preview-6c29c7b6--03ade696-347d-44ac-98f8-f65eceaed8af.lovable.app-1781160103922.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/6a2cf1de-feb6-404d-9504-432e3f5334e8/id-preview-6c29c7b6--03ade696-347d-44ac-98f8-f65eceaed8af.lovable.app-1781160103922.png" },
     ],
     links: [
       {
