@@ -71,7 +71,7 @@ function AuthPage() {
             <GraduationCap className="h-6 w-6 text-primary" />
           </div>
           <CardTitle>Admin Sign In</CardTitle>
-          <CardDescription>Manage student attendance records</CardDescription>
+          <CardDescription>AI-powered administrative dashboard</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin">
