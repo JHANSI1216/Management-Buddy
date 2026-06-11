@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ResourcesRouteImport } from './routes/resources'
 import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as OutreachRouteImport } from './routes/outreach'
 import { Route as MaintenanceRouteImport } from './routes/maintenance'
 import { Route as InventoryRouteImport } from './routes/inventory'
 import { Route as InfrastructureRouteImport } from './routes/infrastructure'
@@ -34,6 +35,11 @@ const ResourcesRoute = ResourcesRouteImport.update({
 const ReportsRoute = ReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OutreachRoute = OutreachRouteImport.update({
+  id: '/outreach',
+  path: '/outreach',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MaintenanceRoute = MaintenanceRouteImport.update({
@@ -86,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/infrastructure': typeof InfrastructureRoute
   '/inventory': typeof InventoryRoute
   '/maintenance': typeof MaintenanceRoute
+  '/outreach': typeof OutreachRoute
   '/reports': typeof ReportsRoute
   '/resources': typeof ResourcesRoute
   '/settings': typeof SettingsRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/infrastructure': typeof InfrastructureRoute
   '/inventory': typeof InventoryRoute
   '/maintenance': typeof MaintenanceRoute
+  '/outreach': typeof OutreachRoute
   '/reports': typeof ReportsRoute
   '/resources': typeof ResourcesRoute
   '/settings': typeof SettingsRoute
@@ -113,6 +121,7 @@ export interface FileRoutesById {
   '/infrastructure': typeof InfrastructureRoute
   '/inventory': typeof InventoryRoute
   '/maintenance': typeof MaintenanceRoute
+  '/outreach': typeof OutreachRoute
   '/reports': typeof ReportsRoute
   '/resources': typeof ResourcesRoute
   '/settings': typeof SettingsRoute
@@ -128,6 +137,7 @@ export interface FileRouteTypes {
     | '/infrastructure'
     | '/inventory'
     | '/maintenance'
+    | '/outreach'
     | '/reports'
     | '/resources'
     | '/settings'
@@ -141,6 +151,7 @@ export interface FileRouteTypes {
     | '/infrastructure'
     | '/inventory'
     | '/maintenance'
+    | '/outreach'
     | '/reports'
     | '/resources'
     | '/settings'
@@ -154,6 +165,7 @@ export interface FileRouteTypes {
     | '/infrastructure'
     | '/inventory'
     | '/maintenance'
+    | '/outreach'
     | '/reports'
     | '/resources'
     | '/settings'
@@ -168,6 +180,7 @@ export interface RootRouteChildren {
   InfrastructureRoute: typeof InfrastructureRoute
   InventoryRoute: typeof InventoryRoute
   MaintenanceRoute: typeof MaintenanceRoute
+  OutreachRoute: typeof OutreachRoute
   ReportsRoute: typeof ReportsRoute
   ResourcesRoute: typeof ResourcesRoute
   SettingsRoute: typeof SettingsRoute
@@ -194,6 +207,13 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/reports'
       preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/outreach': {
+      id: '/outreach'
+      path: '/outreach'
+      fullPath: '/outreach'
+      preLoaderRoute: typeof OutreachRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/maintenance': {
@@ -264,6 +284,7 @@ const rootRouteChildren: RootRouteChildren = {
   InfrastructureRoute: InfrastructureRoute,
   InventoryRoute: InventoryRoute,
   MaintenanceRoute: MaintenanceRoute,
+  OutreachRoute: OutreachRoute,
   ReportsRoute: ReportsRoute,
   ResourcesRoute: ResourcesRoute,
   SettingsRoute: SettingsRoute,
