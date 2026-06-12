@@ -79,6 +79,11 @@ function StudentPortal() {
                 <Label htmlFor="htno">Roll Number (Htno)</Label>
                 <Input id="htno" placeholder="e.g. 21B81A0501" value={htno} onChange={(e) => setHtno(e.target.value)} autoFocus />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="pin">PIN</Label>
+                <Input id="pin" type="password" placeholder="4-digit PIN" maxLength={8} value={pin} onChange={(e) => setPin(e.target.value)} />
+                <p className="text-[11px] text-muted-foreground">Default PIN: <span className="font-mono">1234</span> · change with your class teacher.</p>
+              </div>
               <Button type="submit" className="w-full gradient-bg text-white" disabled={loading}>
                 <LogIn className="h-4 w-4 mr-1" /> {loading ? "Signing in…" : "Sign in"}
               </Button>
@@ -86,6 +91,7 @@ function StudentPortal() {
             <div className="mt-4 text-center text-xs text-muted-foreground">
               <Link to="/auth" className="underline">Admin / staff sign in</Link>
             </div>
+
           </CardContent>
         </Card>
       </div>
