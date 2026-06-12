@@ -24,7 +24,7 @@ export const Route = createFileRoute("/substitutes")({
   component: () => <AppShell><Substitutes /></AppShell>,
 });
 
-const SECTIONS = [CLASS_META.section];
+const SECTIONS: string[] = [CLASS_META.section];
 
 type Sub = {
   id: string;
