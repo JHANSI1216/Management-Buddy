@@ -231,6 +231,7 @@ export type Database = {
           created_at: string
           htno: string
           name: string
+          pin: string
           sno: number
           tp_percent: number | null
           updated_at: string
@@ -239,6 +240,7 @@ export type Database = {
           created_at?: string
           htno: string
           name: string
+          pin?: string
           sno: number
           tp_percent?: number | null
           updated_at?: string
@@ -247,8 +249,54 @@ export type Database = {
           created_at?: string
           htno?: string
           name?: string
+          pin?: string
           sno?: number
           tp_percent?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      substitute_assignments: {
+        Row: {
+          class_section: string
+          created_at: string
+          date: string
+          day_of_week: string
+          id: string
+          original_teacher: string
+          period: string
+          reason: string | null
+          status: string
+          subject: string
+          substitute_teacher: string
+          updated_at: string
+        }
+        Insert: {
+          class_section: string
+          created_at?: string
+          date: string
+          day_of_week: string
+          id?: string
+          original_teacher: string
+          period: string
+          reason?: string | null
+          status?: string
+          subject: string
+          substitute_teacher: string
+          updated_at?: string
+        }
+        Update: {
+          class_section?: string
+          created_at?: string
+          date?: string
+          day_of_week?: string
+          id?: string
+          original_teacher?: string
+          period?: string
+          reason?: string | null
+          status?: string
+          subject?: string
+          substitute_teacher?: string
           updated_at?: string
         }
         Relationships: []
@@ -258,7 +306,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      student_portal_login: {
+        Args: { p_htno: string; p_pin: string }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

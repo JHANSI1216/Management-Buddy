@@ -37,26 +37,30 @@ const TIMETABLE: Record<string, string[]> = {
 
 function StudentPortal() {
   const [htno, setHtno] = useState("");
+  const [pin, setPin] = useState("");
   const [student, setStudent] = useState<Student | null>(null);
   const [marks, setMarks] = useState<Mark[]>([]);
   const [loading, setLoading] = useState(false);
 
   const signIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!htno.trim()) return;
+    if (!htno.trim() || !pin.trim()) return;
     setLoading(true);
-    const { data, error } = await supabase.from("students").select("*").ilike("htno", htno.trim()).maybeSingle();
-    if (error || !data) {
-      setLoading(false);
-      return toast.error("Roll number not found. Check with your class teacher.");
-    }
-    setStudent(data as Student);
-    const { data: m } = await supabase.from("attendance_marks").select("date,status").eq("student_htno", data.htno).order("date", { ascending: false }).limit(30);
-    setMarks((m ?? []) as Mark[]);
+    const { data, error } = await supabase.rpc("student_portal_login", {
+      p_htno: htno.trim(),
+      p_pin: pin.trim(),
+    });
     setLoading(false);
+    if (error || !data) {
+      return toast.error("Invalid roll number or PIN. Default PIN is 1234.");
+    }
+    const payload = data as { htno: string; sno: number; name: string; tp_percent: number | null; marks: Mark[] };
+    setStudent({ htno: payload.htno, sno: payload.sno, name: payload.name, tp_percent: payload.tp_percent });
+    setMarks(payload.marks ?? []);
   };
 
-  const signOut = () => { setStudent(null); setMarks([]); setHtno(""); };
+  const signOut = () => { setStudent(null); setMarks([]); setHtno(""); setPin(""); };
+
 
   if (!student) {
     return (
@@ -75,6 +79,11 @@ function StudentPortal() {
                 <Label htmlFor="htno">Roll Number (Htno)</Label>
                 <Input id="htno" placeholder="e.g. 21B81A0501" value={htno} onChange={(e) => setHtno(e.target.value)} autoFocus />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="pin">PIN</Label>
+                <Input id="pin" type="password" placeholder="4-digit PIN" maxLength={8} value={pin} onChange={(e) => setPin(e.target.value)} />
+                <p className="text-[11px] text-muted-foreground">Default PIN: <span className="font-mono">1234</span> · change with your class teacher.</p>
+              </div>
               <Button type="submit" className="w-full gradient-bg text-white" disabled={loading}>
                 <LogIn className="h-4 w-4 mr-1" /> {loading ? "Signing in…" : "Sign in"}
               </Button>
@@ -82,6 +91,7 @@ function StudentPortal() {
             <div className="mt-4 text-center text-xs text-muted-foreground">
               <Link to="/auth" className="underline">Admin / staff sign in</Link>
             </div>
+
           </CardContent>
         </Card>
       </div>
