@@ -24,16 +24,8 @@ export const Route = createFileRoute("/student")({
 type Student = { htno: string; sno: number; name: string; tp_percent: number | null };
 type Mark = { date: string; status: "present" | "absent" };
 
-const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const PERIODS = ["09:00-09:50", "09:50-10:40", "11:00-11:50", "11:50-12:40", "13:30-14:20", "14:20-15:10"];
-const TIMETABLE: Record<string, string[]> = {
-  Monday:    ["Machine Learning", "Compiler Design", "Cloud Computing", "DBMS Lab", "DBMS Lab", "Sports"],
-  Tuesday:   ["Compiler Design", "Cryptography", "Machine Learning", "ML Lab", "ML Lab", "Library"],
-  Wednesday: ["Cloud Computing", "Machine Learning", "Compiler Design", "Tech Seminar", "Mentoring", "—"],
-  Thursday:  ["Cryptography", "Cloud Computing", "Compiler Design", "Cloud Lab", "Cloud Lab", "Yoga"],
-  Friday:    ["Machine Learning", "Cryptography", "Cloud Computing", "Mini Project", "Mini Project", "—"],
-  Saturday:  ["Aptitude", "Soft Skills", "Mentoring", "—", "—", "—"],
-};
+import { DAYS, PERIODS, TIMETABLE, SUBJECTS, CLASS_META } from "@/lib/timetable";
+
 
 function StudentPortal() {
   const [htno, setHtno] = useState("");
