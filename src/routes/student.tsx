@@ -37,26 +37,30 @@ const TIMETABLE: Record<string, string[]> = {
 
 function StudentPortal() {
   const [htno, setHtno] = useState("");
+  const [pin, setPin] = useState("");
   const [student, setStudent] = useState<Student | null>(null);
   const [marks, setMarks] = useState<Mark[]>([]);
   const [loading, setLoading] = useState(false);
 
   const signIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!htno.trim()) return;
+    if (!htno.trim() || !pin.trim()) return;
     setLoading(true);
-    const { data, error } = await supabase.from("students").select("*").ilike("htno", htno.trim()).maybeSingle();
-    if (error || !data) {
-      setLoading(false);
-      return toast.error("Roll number not found. Check with your class teacher.");
-    }
-    setStudent(data as Student);
-    const { data: m } = await supabase.from("attendance_marks").select("date,status").eq("student_htno", data.htno).order("date", { ascending: false }).limit(30);
-    setMarks((m ?? []) as Mark[]);
+    const { data, error } = await supabase.rpc("student_portal_login", {
+      p_htno: htno.trim(),
+      p_pin: pin.trim(),
+    });
     setLoading(false);
+    if (error || !data) {
+      return toast.error("Invalid roll number or PIN. Default PIN is 1234.");
+    }
+    const payload = data as { htno: string; sno: number; name: string; tp_percent: number | null; marks: Mark[] };
+    setStudent({ htno: payload.htno, sno: payload.sno, name: payload.name, tp_percent: payload.tp_percent });
+    setMarks(payload.marks ?? []);
   };
 
-  const signOut = () => { setStudent(null); setMarks([]); setHtno(""); };
+  const signOut = () => { setStudent(null); setMarks([]); setHtno(""); setPin(""); };
+
 
   if (!student) {
     return (
