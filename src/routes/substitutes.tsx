@@ -23,36 +23,25 @@ export const Route = createFileRoute("/substitutes")({
   component: () => <AppShell><Substitutes /></AppShell>,
 });
 
-const TEACHERS = [
-  { name: "Dr. R. Krishna", dept: "CSE", subjects: ["Machine Learning", "Compiler Design"] },
-  { name: "Prof. S. Meena", dept: "CSE", subjects: ["Cloud Computing", "DBMS"] },
-  { name: "Dr. A. Prakash", dept: "AI&DS", subjects: ["Machine Learning", "Cryptography"] },
-  { name: "Prof. K. Ramya", dept: "CSE", subjects: ["Compiler Design", "DBMS"] },
-  { name: "Dr. V. Suresh", dept: "AI&DS", subjects: ["Cloud Computing", "Cryptography"] },
-  { name: "Prof. J. Anitha", dept: "CSE", subjects: ["Mentoring", "Soft Skills"] },
-  { name: "Dr. M. Bhanu", dept: "MATH", subjects: ["Aptitude", "Discrete Maths"] },
-  { name: "Prof. L. Deepak", dept: "CSE", subjects: ["Mini Project", "Tech Seminar"] },
-];
+import { TEACHERS, SUBJECTS, TIMETABLE, PERIODS, DAYS, CLASS_META, suggestSubstitutes, type Day, type SubjectKey } from "@/lib/timetable";
 
-const PERIODS = ["09:00-09:50", "09:50-10:40", "11:00-11:50", "11:50-12:40", "13:30-14:20", "14:20-15:10"];
-const SECTIONS = ["IV-CSE-A", "IV-CSE-B", "III-CSE-A", "III-AI&DS-A", "II-CSE-A"];
+export const Route = createFileRoute("/substitutes")({
+  head: () => ({
+    meta: [
+      { title: "Substitute Allocation · CPMS" },
+      { name: "description", content: "Allot substitute teachers to classes when staff are on leave." },
+    ],
+  }),
+  component: () => <AppShell><Substitutes /></AppShell>,
+});
 
-type Sub = {
-  id: string;
-  date: string;
-  day_of_week: string;
-  period: string;
-  class_section: string;
-  subject: string;
-  original_teacher: string;
-  substitute_teacher: string;
-  reason: string | null;
-  status: "scheduled" | "completed" | "cancelled";
-};
+const SECTIONS = [CLASS_META.section];
 
-function dayName(d: string) {
-  return new Date(d).toLocaleDateString(undefined, { weekday: "long" });
+function dayName(d: string): Day {
+  const name = new Date(d).toLocaleDateString(undefined, { weekday: "long" });
+  return (DAYS as readonly string[]).includes(name) ? (name as Day) : "Monday";
 }
+
 
 function Substitutes() {
   const [rows, setRows] = useState<Sub[]>([]);
