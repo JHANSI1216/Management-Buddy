@@ -24,16 +24,8 @@ export const Route = createFileRoute("/student")({
 type Student = { htno: string; sno: number; name: string; tp_percent: number | null };
 type Mark = { date: string; status: "present" | "absent" };
 
-const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const PERIODS = ["09:00-09:50", "09:50-10:40", "11:00-11:50", "11:50-12:40", "13:30-14:20", "14:20-15:10"];
-const TIMETABLE: Record<string, string[]> = {
-  Monday:    ["Machine Learning", "Compiler Design", "Cloud Computing", "DBMS Lab", "DBMS Lab", "Sports"],
-  Tuesday:   ["Compiler Design", "Cryptography", "Machine Learning", "ML Lab", "ML Lab", "Library"],
-  Wednesday: ["Cloud Computing", "Machine Learning", "Compiler Design", "Tech Seminar", "Mentoring", "—"],
-  Thursday:  ["Cryptography", "Cloud Computing", "Compiler Design", "Cloud Lab", "Cloud Lab", "Yoga"],
-  Friday:    ["Machine Learning", "Cryptography", "Cloud Computing", "Mini Project", "Mini Project", "—"],
-  Saturday:  ["Aptitude", "Soft Skills", "Mentoring", "—", "—", "—"],
-};
+import { DAYS, PERIODS, TIMETABLE, SUBJECTS, CLASS_META } from "@/lib/timetable";
+
 
 function StudentPortal() {
   const [htno, setHtno] = useState("");
@@ -168,31 +160,51 @@ function StudentPortal() {
             <Card className="glass">
               <CardHeader>
                 <CardTitle className="text-base">Weekly Timetable</CardTitle>
-                <CardDescription>BTech CSE · IV Year · Sem-I</CardDescription>
+                <CardDescription>
+                  {CLASS_META.programme} · {CLASS_META.section} · Room {CLASS_META.room} · AY {CLASS_META.academicYear}
+                </CardDescription>
               </CardHeader>
               <CardContent className="p-0 overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-24">Day</TableHead>
-                      {PERIODS.map((p) => <TableHead key={p} className="text-xs">{p}</TableHead>)}
+                      {PERIODS.map((p, i) => (
+                        <TableHead key={p} className="text-xs whitespace-nowrap">
+                          P{i + 1}<div className="text-[10px] text-muted-foreground font-normal">{p}</div>
+                        </TableHead>
+                      ))}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {DAYS.map((d) => (
                       <TableRow key={d}>
                         <TableCell className="font-medium">{d}</TableCell>
-                        {TIMETABLE[d].map((cls, i) => (
-                          <TableCell key={i} className="text-xs">
-                            {cls === "—" ? <span className="text-muted-foreground">—</span> : cls}
-                          </TableCell>
-                        ))}
+                        {TIMETABLE[d].map((cls, i) => {
+                          if (!cls) return <TableCell key={i} className="text-xs text-muted-foreground">—</TableCell>;
+                          const s = SUBJECTS[cls];
+                          const isPT = cls === "PT";
+                          return (
+                            <TableCell key={i} className="text-xs">
+                              <div className={`rounded px-1.5 py-0.5 font-medium ${isPT ? "bg-amber-500/10 text-amber-700 dark:text-amber-300" : "bg-primary/10 text-primary"}`}>
+                                {cls}
+                              </div>
+                              <div className="text-[10px] text-muted-foreground mt-0.5 leading-tight">{s.name}</div>
+                            </TableCell>
+                          );
+                        })}
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
+                <div className="px-4 py-3 text-[11px] text-muted-foreground border-t">
+                  <span className="font-medium">Lunch:</span> 12:40–13:30 &nbsp;·&nbsp;
+                  <span className="font-medium">Short Break:</span> 16:00–16:10 &nbsp;·&nbsp;
+                  <span className="font-medium">Class Counsellor:</span> {CLASS_META.classCounsellor}
+                </div>
               </CardContent>
             </Card>
+
           </TabsContent>
 
           <TabsContent value="history">
