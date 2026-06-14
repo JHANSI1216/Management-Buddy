@@ -88,9 +88,10 @@ function Substitutes() {
   };
 
   const suggestions = useMemo(
-    () => suggestSubstitutes(form.subject || "", form.original_teacher),
-    [form.subject, form.original_teacher],
+    () => suggestSubstitutes(form.subject || "", form.original_teacher, currentDay, periodIdx),
+    [form.subject, form.original_teacher, currentDay, periodIdx],
   );
+  const freeSuggestions = suggestions.filter((s) => !s.isBusy);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
