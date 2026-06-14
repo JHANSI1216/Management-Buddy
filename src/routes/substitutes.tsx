@@ -92,6 +92,20 @@ function Substitutes() {
     [form.subject, form.original_teacher, currentDay, periodIdx],
   );
   const freeSuggestions = suggestions.filter((s) => !s.isBusy);
+  const bestPick = freeSuggestions[0];
+
+  // Auto-predict: whenever subject / teacher-on-leave / slot changes, snap the
+  // substitute to the top-ranked free teacher (unless the user already picked
+  // someone who is still free).
+  useEffect(() => {
+    if (!form.subject || !form.original_teacher || !bestPick) return;
+    const currentIsValid =
+      form.substitute_teacher &&
+      freeSuggestions.some((s) => s.name === form.substitute_teacher);
+    if (currentIsValid) return;
+    setForm((f) => ({ ...f, substitute_teacher: bestPick.name }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.subject, form.original_teacher, currentDay, periodIdx]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -183,6 +197,36 @@ function Substitutes() {
                   <Wand2 className="h-3.5 w-3.5 mr-1" /> Auto-fill
                 </Button>
               </div>
+
+              {form.subject && form.original_teacher && (
+                <div className="rounded-md border border-primary/40 bg-primary/5 p-3 flex items-center justify-between gap-3">
+                  <div className="text-xs">
+                    <p className="text-muted-foreground flex items-center gap-1">
+                      <Brain className="h-3 w-3 text-primary" /> Predicted substitute
+                    </p>
+                    {bestPick ? (
+                      <>
+                        <p className="font-medium">{bestPick.name}</p>
+                        <p className="text-[11px] text-muted-foreground">
+                          Free this period · Fit score {bestPick.score} · Teaches {bestPick.subjects.join(", ")}
+                        </p>
+                      </>
+                    ) : (
+                      <p className="font-medium text-destructive">No free teacher this slot</p>
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="gradient-bg text-white"
+                    disabled={!bestPick}
+                    onClick={() => bestPick && setForm((f) => ({ ...f, substitute_teacher: bestPick.name }))}
+                  >
+                    <Wand2 className="h-3.5 w-3.5 mr-1" /> Use prediction
+                  </Button>
+                </div>
+              )}
+
 
               <div className="space-y-1.5">
                 <Label>Class / Section</Label>
