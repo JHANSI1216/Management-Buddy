@@ -247,25 +247,31 @@ function Substitutes() {
         <Card className="glass">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2"><Brain className="h-4 w-4 text-primary" /> AI Suggested Substitutes</CardTitle>
-            <CardDescription>Ranked by subject match and same department</CardDescription>
+            <CardDescription>
+              Cross-checks every teacher's own schedule for {currentDay} · {form.period}.
+              {form.subject && ` ${freeSuggestions.length} free of ${suggestions.length}.`}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {!form.subject && <p className="text-xs text-muted-foreground">Pick a subject (or auto-fill from the period) to see ranked suggestions.</p>}
             {form.subject && suggestions.map((s, i) => (
-              <div key={s.name} className="flex items-center justify-between rounded-lg border p-3">
+              <div key={s.name} className={`flex items-center justify-between rounded-lg border p-3 ${s.isBusy ? "opacity-60" : ""}`}>
                 <div>
-                  <p className="font-medium text-sm">
-                    #{i + 1} · {s.name} <Badge variant="outline" className="ml-1">{s.dept}</Badge>
+                  <p className="font-medium text-sm flex flex-wrap items-center gap-1">
+                    #{i + 1} · {s.name} <Badge variant="outline">{s.dept}</Badge>
+                    {s.isBusy
+                      ? <Badge variant="destructive">Busy · {s.busyReason}</Badge>
+                      : <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">Free this period</Badge>}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     Teaches: {s.subjects.map((k) => `${k} (${SUBJECTS[k as SubjectKey].name})`).join(", ")}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge className={s.score >= 12 ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300" : "bg-muted"}>
+                  <Badge className={s.score >= 20 ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300" : "bg-muted"}>
                     Fit {s.score}
                   </Badge>
-                  <Button size="sm" variant="outline" onClick={() => setForm({ ...form, substitute_teacher: s.name })}>Pick</Button>
+                  <Button size="sm" variant="outline" disabled={s.isBusy} onClick={() => setForm({ ...form, substitute_teacher: s.name })}>Pick</Button>
                 </div>
               </div>
             ))}
