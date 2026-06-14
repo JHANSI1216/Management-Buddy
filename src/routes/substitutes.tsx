@@ -198,6 +198,36 @@ function Substitutes() {
                 </Button>
               </div>
 
+              {form.subject && form.original_teacher && (
+                <div className="rounded-md border border-primary/40 bg-primary/5 p-3 flex items-center justify-between gap-3">
+                  <div className="text-xs">
+                    <p className="text-muted-foreground flex items-center gap-1">
+                      <Brain className="h-3 w-3 text-primary" /> Predicted substitute
+                    </p>
+                    {bestPick ? (
+                      <>
+                        <p className="font-medium">{bestPick.name}</p>
+                        <p className="text-[11px] text-muted-foreground">
+                          Free this period · Fit score {bestPick.score} · Teaches {bestPick.subjects.join(", ")}
+                        </p>
+                      </>
+                    ) : (
+                      <p className="font-medium text-destructive">No free teacher this slot</p>
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="gradient-bg text-white"
+                    disabled={!bestPick}
+                    onClick={() => bestPick && setForm((f) => ({ ...f, substitute_teacher: bestPick.name }))}
+                  >
+                    <Wand2 className="h-3.5 w-3.5 mr-1" /> Use prediction
+                  </Button>
+                </div>
+              )}
+
+
               <div className="space-y-1.5">
                 <Label>Class / Section</Label>
                 <Select value={form.class_section} onValueChange={(v) => setForm({ ...form, class_section: v })}>
