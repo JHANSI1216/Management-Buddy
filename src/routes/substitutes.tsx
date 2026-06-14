@@ -92,6 +92,20 @@ function Substitutes() {
     [form.subject, form.original_teacher, currentDay, periodIdx],
   );
   const freeSuggestions = suggestions.filter((s) => !s.isBusy);
+  const bestPick = freeSuggestions[0];
+
+  // Auto-predict: whenever subject / teacher-on-leave / slot changes, snap the
+  // substitute to the top-ranked free teacher (unless the user already picked
+  // someone who is still free).
+  useEffect(() => {
+    if (!form.subject || !form.original_teacher || !bestPick) return;
+    const currentIsValid =
+      form.substitute_teacher &&
+      freeSuggestions.some((s) => s.name === form.substitute_teacher);
+    if (currentIsValid) return;
+    setForm((f) => ({ ...f, substitute_teacher: bestPick.name }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.subject, form.original_teacher, currentDay, periodIdx]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
