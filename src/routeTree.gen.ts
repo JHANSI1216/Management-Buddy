@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SubstitutesRouteImport } from './routes/substitutes'
-import { Route as StudentRouteImport } from './routes/student'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ResourcesRouteImport } from './routes/resources'
 import { Route as ReportsRouteImport } from './routes/reports'
@@ -27,11 +26,6 @@ import { Route as IndexRouteImport } from './routes/index'
 const SubstitutesRoute = SubstitutesRouteImport.update({
   id: '/substitutes',
   path: '/substitutes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StudentRoute = StudentRouteImport.update({
-  id: '/student',
-  path: '/student',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -108,7 +102,6 @@ export interface FileRoutesByFullPath {
   '/reports': typeof ReportsRoute
   '/resources': typeof ResourcesRoute
   '/settings': typeof SettingsRoute
-  '/student': typeof StudentRoute
   '/substitutes': typeof SubstitutesRoute
 }
 export interface FileRoutesByTo {
@@ -124,7 +117,6 @@ export interface FileRoutesByTo {
   '/reports': typeof ReportsRoute
   '/resources': typeof ResourcesRoute
   '/settings': typeof SettingsRoute
-  '/student': typeof StudentRoute
   '/substitutes': typeof SubstitutesRoute
 }
 export interface FileRoutesById {
@@ -141,7 +133,6 @@ export interface FileRoutesById {
   '/reports': typeof ReportsRoute
   '/resources': typeof ResourcesRoute
   '/settings': typeof SettingsRoute
-  '/student': typeof StudentRoute
   '/substitutes': typeof SubstitutesRoute
 }
 export interface FileRouteTypes {
@@ -159,7 +150,6 @@ export interface FileRouteTypes {
     | '/reports'
     | '/resources'
     | '/settings'
-    | '/student'
     | '/substitutes'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -175,7 +165,6 @@ export interface FileRouteTypes {
     | '/reports'
     | '/resources'
     | '/settings'
-    | '/student'
     | '/substitutes'
   id:
     | '__root__'
@@ -191,7 +180,6 @@ export interface FileRouteTypes {
     | '/reports'
     | '/resources'
     | '/settings'
-    | '/student'
     | '/substitutes'
   fileRoutesById: FileRoutesById
 }
@@ -208,7 +196,6 @@ export interface RootRouteChildren {
   ReportsRoute: typeof ReportsRoute
   ResourcesRoute: typeof ResourcesRoute
   SettingsRoute: typeof SettingsRoute
-  StudentRoute: typeof StudentRoute
   SubstitutesRoute: typeof SubstitutesRoute
 }
 
@@ -219,13 +206,6 @@ declare module '@tanstack/react-router' {
       path: '/substitutes'
       fullPath: '/substitutes'
       preLoaderRoute: typeof SubstitutesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/student': {
-      id: '/student'
-      path: '/student'
-      fullPath: '/student'
-      preLoaderRoute: typeof StudentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -328,7 +308,6 @@ const rootRouteChildren: RootRouteChildren = {
   ReportsRoute: ReportsRoute,
   ResourcesRoute: ResourcesRoute,
   SettingsRoute: SettingsRoute,
-  StudentRoute: StudentRoute,
   SubstitutesRoute: SubstitutesRoute,
 }
 export const routeTree = rootRouteImport

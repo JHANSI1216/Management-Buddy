@@ -58,18 +58,53 @@ export const TEACHERS = [
   { name: "Dr. C Rajendra",       dept: "CSM", subjects: ["PE"]   as SubjectKey[] },
 ] as const;
 
-export function suggestSubstitutes(subject: SubjectKey | string, originalTeacher: string) {
+// Extra side-class commitments (DS I CSM A/B/C) outside the IV CSM timetable.
+// period index 0..6 maps to PERIODS[].
+type Commitment = { teacher: string; day: Day; period: number; label: string };
+export const OTHER_COMMITMENTS: Commitment[] = [
+  { teacher: "Dr. C Rajendra",       day: "Monday",  period: 1, label: "DS I CSM-A" },
+  { teacher: "Dr. C Rajendra",       day: "Friday",  period: 1, label: "DS I CSM-A" },
+  { teacher: "Mrs. V Kusuma Priya",  day: "Monday",  period: 1, label: "DS I CSM-C" },
+  { teacher: "Mrs. V Kusuma Priya",  day: "Friday",  period: 0, label: "DS I CSM-C" },
+  { teacher: "Mrs. D Sujitha",       day: "Monday",  period: 4, label: "DS I CSM-B" },
+  { teacher: "Mrs. D Sujitha",       day: "Tuesday", period: 3, label: "DS I CSM-B" },
+];
+
+/** Returns { busy, reason } for a teacher at a given day+period across ALL their classes. */
+export function teacherBusyAt(teacher: string, day: Day, periodIdx: number): { busy: boolean; reason?: string } {
+  const sk = TIMETABLE[day][periodIdx];
+  if (sk && sk !== "PT" && SUBJECTS[sk].teacher === teacher) {
+    return { busy: true, reason: `IV CSM · ${sk}` };
+  }
+  const other = OTHER_COMMITMENTS.find(c => c.teacher === teacher && c.day === day && c.period === periodIdx);
+  if (other) return { busy: true, reason: other.label };
+  return { busy: false };
+}
+
+export function suggestSubstitutes(
+  subject: SubjectKey | string,
+  originalTeacher: string,
+  day?: Day,
+  periodIdx?: number,
+) {
   const subj = String(subject).toUpperCase();
+  const haveSlot = day != null && periodIdx != null && periodIdx >= 0;
   return TEACHERS
     .filter((t) => t.name !== originalTeacher)
     .map((t) => {
+      const status = haveSlot ? teacherBusyAt(t.name, day!, periodIdx!) : { busy: false };
       const teaches = t.subjects.includes(subj as SubjectKey) ? 12 : 0;
       const adjacent = t.subjects.some((s) => ["GAI","AICS","DW","PE"].includes(s) && ["GAI","AICS","DW","PE"].includes(subj)) ? 4 : 0;
       const sameDept = 3;
-      return { ...t, score: teaches + adjacent + sameDept };
+      const freeBonus = haveSlot && !status.busy ? 10 : 0;
+      return {
+        ...t,
+        isBusy: status.busy,
+        busyReason: status.reason,
+        score: teaches + adjacent + sameDept + freeBonus,
+      };
     })
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 3);
+    .sort((a, b) => Number(a.isBusy) - Number(b.isBusy) || b.score - a.score);
 }
 
 export const CLASS_META = {

@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   Brain, LayoutDashboard, Building2, Zap, Package, Wrench, BarChart3,
-  Settings, GraduationCap, Sun, Moon, LogOut, LogIn, Sparkles, TrendingUp, Megaphone, UserCircle, Users,
+  Settings, GraduationCap, Sun, Moon, LogOut, LogIn, Sparkles, TrendingUp, Megaphone, Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/useTheme";
@@ -31,7 +31,6 @@ const modules = [
 ];
 const extras = [
   { title: "Attendance", url: "/attendance", icon: GraduationCap },
-  { title: "Student Portal", url: "/student", icon: UserCircle },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
